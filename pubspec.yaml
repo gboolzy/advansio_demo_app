@@ -46,7 +46,9 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
   flutter_svg: ^2.2.1
-  google_fonts: ^6.3.2
+  dio: ^5.9.0
+  intl: ^0.20.2
+  localstorage: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

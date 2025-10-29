@@ -4,6 +4,9 @@ import 'package:demo_app/util/widget/util_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'client/news_feed_client.dart';
+import 'client/news_feed_model.dart';
+
 class NewsFeedScreen extends StatefulWidget {
   const NewsFeedScreen({super.key});
 
@@ -12,6 +15,11 @@ class NewsFeedScreen extends StatefulWidget {
 }
 
 class _NewsFeedScreenState extends State<NewsFeedScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -153,42 +161,44 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
                   ),
                   SizedBox(height: 20),
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          NewsBlock(
-                            imagePath: 'assets/images/news_img.png',
-                            newsHeadlines: 'Local news',
-                            newsHeadlinesTitle:
-                                'Fuel subsidy discussion in T-pain reign',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const NewsScreen(),
-                                ),
-                              );
-                            },
-                          ),
+                    child: FutureBuilder<NewsFeedResponse?>(
+                        future: fetchNewsFeed(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasError || snapshot.data == null) {
+                            return const Center(
+                                child: Text('Failed to load news'));
+                          }
 
-                          NewsBlock(
-                            imagePath: 'assets/images/news_img.png',
-                            newsHeadlines: 'Local news',
-                            newsHeadlinesTitle:
-                                'Fuel subsidy discussion in T-pain reign',
-                            onTap: () {},
+                          final articles = snapshot.data!.articles;
+                          return ListView.builder(
+                              itemCount: articles.length,
+                              itemBuilder: (context, index) {
+                                final article = articles[index];
+                                return NewsBlock(
+                                  imagePath: article.urlToImage,
+                                  newsHeadlines: article.source?.name != null? article.source!.name!: "Latest news",
+                                  newsHeadlinesTitle: article.title != null? article.title!: "",
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (
+                                            context) =>  NewsScreen(imageUrl: article.urlToImage, title: article.title, headline: article.source?.name, author: article.author, description: article.description, time: article.publishedAt.toString(),),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+                          );
+
+                        }
                           ),
-                          NewsBlock(
-                            imagePath: 'assets/images/news_img.png',
-                            newsHeadlines: 'Local news',
-                            newsHeadlinesTitle:
-                                'Fuel subsidy discussion in T-pain reign',
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  )
                 ],
               ),
             ),
@@ -238,14 +248,14 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
 
 
 class NewsBlock extends StatelessWidget {
-  final String imagePath;
+  final String? imagePath;
   final String newsHeadlines;
   final String newsHeadlinesTitle;
   final double? fontSize;
   final void Function() onTap;
   const NewsBlock({
     super.key,
-    required this.imagePath,
+    this.imagePath,
     required this.newsHeadlines,
     required this.newsHeadlinesTitle,
     required this.onTap,
@@ -264,13 +274,12 @@ class NewsBlock extends StatelessWidget {
               SizedBox(
                 height: 171,
                 width: double.infinity,
-                child: Image.asset(imagePath),
+                child: imagePath != null ? Image.network(imagePath!): Image.asset("assets/images/news_img.png"),
               ),
               Positioned(
                 right: 20,
                 top: 15,
                 child: Container(
-                  width: 76,
                   height: 28,
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.20),
@@ -278,13 +287,16 @@ class NewsBlock extends StatelessWidget {
                   ),
                   child: Align(
                     alignment: Alignment.center,
-                    child: Text(
-                      newsHeadlines,
-                      style: TextStyle(
-                        fontFamily: 'satoshi',
-                        color: Color(0xFF071A27),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        newsHeadlines,
+                        style: TextStyle(
+                          fontFamily: 'satoshi',
+                          color: Color(0xFF071A27),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
@@ -302,6 +314,9 @@ class NewsBlock extends StatelessWidget {
               color: Color(0xFF475569),
             ),
           ),
+          SizedBox(
+            height: 20,
+          )
         ],
       ),
     );
