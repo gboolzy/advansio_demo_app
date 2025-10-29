@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class InputField extends StatelessWidget {
-  final String inputLabel;
+  final String? inputLabel;
   final String inputPlaceholder;
+  final double? borderRadius;
   final TextInputType? textInputType;
   final bool? obscureText;
+  final Color? backgroundColor;
+  final Widget? prefixIcon;
   const InputField({
     super.key,
-    required this.inputLabel,
+    this.inputLabel,
     required this.inputPlaceholder,
+    this.borderRadius,
     this.textInputType,
     this.obscureText,
+    this.backgroundColor,
+    this.prefixIcon,
   });
 
   @override
@@ -19,7 +26,7 @@ class InputField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          inputLabel,
+          inputLabel ?? "",
           style: const TextStyle(
             fontFamily: 'Satoshi',
             color: Color(0xFF071A27),
@@ -32,19 +39,33 @@ class InputField extends StatelessWidget {
           height: 49,
           child: TextFormField(
             obscureText: obscureText ?? false,
-            keyboardType: textInputType ?? TextInputType.text ,
+            keyboardType: textInputType ?? TextInputType.text,
             decoration: InputDecoration(
+              hint: Text(
+                inputPlaceholder,
+                style: TextStyle(
+                  fontFamily: 'Satoshi',
+                  color: Color(0xFF475569),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              prefixIcon: Padding(
+                padding:  EdgeInsets.only(left: prefixIcon != null? 30 : 10),
+                child: prefixIcon,
+              )  ,
+              prefixIconConstraints: BoxConstraints(
+                minWidth: prefixIcon != null? 40 : 10, // reduce default padding
+              ),
               filled: true,
-              fillColor: const Color(0xFFF3F6F8),
-              labelText: inputPlaceholder,
-              labelStyle: const TextStyle(
-                fontFamily: 'Satoshi',
-                color: Color(0xFF475569),
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+              fillColor: backgroundColor ?? Color(0xFFF3F6F8),
+
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10, //
+                // vertical: 14,   //
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(borderRadius ?? 8),
                 borderSide: BorderSide.none,
               ),
             ),

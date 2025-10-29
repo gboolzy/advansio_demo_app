@@ -1,3 +1,4 @@
+import 'package:demo_app/app/login_screen.dart';
 import 'package:demo_app/app/status_screen.dart';
 import 'package:demo_app/util/widget/app_button.dart';
 import 'package:demo_app/util/widget/app_logo.dart';
@@ -127,12 +128,17 @@ class _SignupScreenState extends State<SignupScreen> {
                                           children: [
                                             Align(
                                               alignment: Alignment.centerLeft,
-                                              child: AppContainerButton(buttonText: 'Signup', ),
+                                              child: AppContainerButton(buttonText: 'Signup', onPress: (){
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const StatusScreen()),
+                                                );
+                                              }, ),
                                             ),
                                             AppTextButton(buttonText: "Login" , alignment: Alignment.centerRight , onPress: (){
                                               Navigator.push(
                                                 context,
-                                                MaterialPageRoute(builder: (context) => const StatusScreen()),
+                                                MaterialPageRoute(builder: (context) => const LoginScreen()),
                                               );
                                             },),
 
