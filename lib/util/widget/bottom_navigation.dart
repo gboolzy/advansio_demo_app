@@ -23,30 +23,29 @@ class _BottomNavState extends State<BottomNav> {
     profile = false;
     super.initState();
   }
-
+  bottomNavFunc(String value) {
+    print("=========>" + value);
+    setState(() {
+      home = false;
+      explore = false;
+      heart = false;
+      profile = false;
+      if(value == "home"){
+        home = true;
+      }else if(value == "explore"){
+        explore = true;
+      }else if(value == "heart"){
+        heart = true;
+      }else if(value == "profile"){
+        profile = true;
+      }
+    });
+  }
 
 
   @override
   Widget build(BuildContext context) {
-    bottomNavFunc(String value) {
-      print("=========>" + value);
-      setState(() {
-        home = false;
-        explore = false;
-        heart = false;
-        profile = false;
-        if(value == "home"){
-          home = true;
-        }else if(value == "explore"){
-          explore = true;
-        }else if(value == "explore"){
-          heart = true;
-        }else if(value == "explore"){
-          profile = true;
-        }
 
-      });
-    }
     return Container(
       height: 68,
       decoration: BoxDecoration(
@@ -61,22 +60,24 @@ class _BottomNavState extends State<BottomNav> {
             BottomNavIcon(
               imagePath: "assets/icons/home.svg",
               isActive: home,
-              bottomNavAction: bottomNavFunc("home"),
+              bottomNavAction: ()=>bottomNavFunc("home"),
             ),
             BottomNavIcon(
               imagePath: "assets/icons/explore.svg",
               isActive: explore,
-              bottomNavAction: bottomNavFunc("explore"),
+              bottomNavAction:()=> bottomNavFunc("explore"),
             ),
             BottomNavIcon(
               imagePath: "assets/icons/heart.svg",
               isActive: heart,
-              bottomNavAction: bottomNavFunc("heart"),
+              bottomNavAction:()=> bottomNavFunc("heart"),
             ),
             BottomNavIcon(
               imagePath: "assets/icons/profile.svg",
               isActive: profile,
-              bottomNavAction: bottomNavFunc("profile"),
+              bottomNavAction: (){
+                bottomNavFunc("profile");
+              }
             ),
           ],
         ),

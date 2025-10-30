@@ -1,7 +1,6 @@
 import 'package:demo_app/app/news_feed_screen.dart';
 import 'package:demo_app/app/service/auth_service.dart';
 import 'package:demo_app/app/signup_screen.dart';
-import 'package:demo_app/app/status_screen.dart';
 import 'package:demo_app/util/widget/app_button.dart';
 import 'package:demo_app/util/widget/app_logo.dart';
 import 'package:demo_app/util/widget/social_media.dart';
@@ -35,7 +34,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       }else{
-        print("false");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid username/password'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red,
+          ),
+        );
+
       }
 
     } else {

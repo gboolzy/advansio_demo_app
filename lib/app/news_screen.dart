@@ -126,7 +126,7 @@ class NewsScreen extends StatelessWidget {
             ),
             Positioned(
               bottom: 20,
-              left: 20, // equal margin on left
+              left: 20,
               right: 20,
               child: BottomNav(),
             ),

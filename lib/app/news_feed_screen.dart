@@ -17,9 +17,46 @@ class NewsFeedScreen extends StatefulWidget {
 }
 
 class _NewsFeedScreenState extends State<NewsFeedScreen> {
+  late bool all;
+  late bool trending;
+  late bool sport;
+  late bool politics;
+  late bool international;
+
   String? userName = "";
   Future<void> loadUser() async {
     userName = await LocalAuthService.getUserName();
+    setState(() {});
+  }
+
+  void setActiveNewsTab(String value) {
+    print("================= ${value}");
+    all = false;
+    trending = false;
+    sport = false;
+    politics = false;
+    international = false;
+
+    switch (value) {
+
+      case "all":
+        all = true;
+        break;
+      case "trending":
+        trending = true;
+        break;
+      case "sport":
+        sport = true;
+        break;
+      case "politics":
+        politics = true;
+        break;
+      case "international":
+        international = true;
+        break;
+      default:
+        break;
+    }
     setState(() {});
   }
 
@@ -27,6 +64,11 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
   void initState() {
     // TODO: implement initState
     loadUser();
+    all = true;
+    trending = false;
+    sport = false;
+    politics = false;
+    international = false;
     super.initState();
   }
 
@@ -36,160 +78,181 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
       child: Scaffold(
         body: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 40,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
+            SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 40,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(32),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(32),
-                                child: Image.asset(
-                                  "assets/images/user_img.png",
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              userName !=null ?  'Hi, $userName': 'Hi, ' ,
-                              style: TextStyle(
-                                fontFamily: 'Satoshi',
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF071A27),
-                              ),
-                            ),
-                          ],
-                        ),
-                        AppNotification(isActive: true),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  NewsBlock(newsHeadlines: "🔥 Hot news", newsHeadlinesTitle: "Fuel subsidy discussion in T-pain reign ", fontSize: 24, onTap: (){}),
-                  
-                  SizedBox(height: 10),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.end,
-                  //   children: [
-                  //     SizedBox(
-                  //       width: 264,
-                  //       child: Text(
-                  //         'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor  Excepteur sint occaecat cupidatat non.',
-                  //         textAlign: TextAlign.right,
-                  //         style: TextStyle(
-                  //           fontFamily: 'Satoshi',
-                  //           fontSize: 14,
-                  //           fontWeight: FontWeight.w500,
-                  //           color: Color(0xFF475569),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SliderIndicator(status: true),
-                      SizedBox(width: 5),
-                      SliderIndicator(status: false),
-                      SizedBox(width: 5),
-                      SliderIndicator(status: false),
-                    ],
-                  ),
-                  InputField(
-                    prefixIcon: SvgPicture.asset("assets/icons/search.svg"),
-                    inputPlaceholder: 'Trending, Sport, etc',
-                    borderRadius: 40,
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              NewsTabs(tabLabel: "All", active: true),
-                              NewsTabs(tabLabel: "Trending", active: false),
-                              NewsTabs(tabLabel: "Sport", active: false),
-                              NewsTabs(tabLabel: "Politics", active: false),
-                              NewsTabs(
-                                tabLabel: "International",
-                                active: false,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Expanded(
-                    child: FutureBuilder<NewsFeedResponse?>(
-                      future: fetchNewsFeed(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        if (snapshot.hasError || snapshot.data == null) {
-                          return const Center(
-                            child: Text('Failed to load news'),
-                          );
-                        }
-
-                        final articles = snapshot.data!.articles;
-                        return ListView.builder(
-                          itemCount: articles.length,
-                          itemBuilder: (context, index) {
-                            final article = articles[index];
-                            return NewsBlock(
-                              imagePath: article.urlToImage,
-                              newsHeadlines: article.source?.name != null
-                                  ? article.source!.name!
-                                  : "Latest news",
-                              newsHeadlinesTitle: article.title != null
-                                  ? article.title!
-                                  : "",
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => NewsScreen(
-                                      imageUrl: article.urlToImage,
-                                      title: article.title,
-                                      headline: article.source?.name,
-                                      author: article.author,
-                                      description: article.description,
-                                      time: article.publishedAt.toString(),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(32),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(32),
+                                    child: Image.asset(
+                                      "assets/images/user_img.png",
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  userName != null ? 'Hi, $userName' : 'Hi, ',
+                                  style: TextStyle(
+                                    fontFamily: 'Satoshi',
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF071A27),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            AppNotification(isActive: true),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      NewsBlock(
+                        newsHeadlines: "🔥 Hot news",
+                        newsHeadlinesTitle:
+                            "Fuel subsidy discussion in T-pain reign ",
+                        fontSize: 24,
+                        onTap: () {},
+                      ),
+                              
+                      SizedBox(height: 10),
+                              
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SliderIndicator(status: true),
+                          SizedBox(width: 5),
+                          SliderIndicator(status: false),
+                          SizedBox(width: 5),
+                          SliderIndicator(status: false),
+                        ],
+                      ),
+                      InputField(
+                        prefixIcon: SvgPicture.asset("assets/icons/search.svg"),
+                        inputPlaceholder: 'Trending, Sport, etc',
+                        borderRadius: 40,
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => setActiveNewsTab("all"),
+                                    child: NewsTabs(tabLabel: "All", active: all),
+                                  ),
+                                  GestureDetector(
+                                    onTap:  () => setActiveNewsTab("trending"),
+                                    child: NewsTabs(
+                                      tabLabel: "Trending",
+                                      active: trending,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap:  () => setActiveNewsTab("sport"),
+                                    child: NewsTabs(
+                                      tabLabel: "Sport",
+                                      active: sport,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap:  () => setActiveNewsTab("politics"),
+                                    child: NewsTabs(
+                                      tabLabel: "Politics",
+                                      active: politics,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap:  () => setActiveNewsTab("international"),
+                                    child: NewsTabs(
+                                      tabLabel: "International",
+                                      active: international,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      SizedBox(
+                        height: 400,
+                        child: FutureBuilder<NewsFeedResponse?>(
+                          future: fetchNewsFeed(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (snapshot.hasError || snapshot.data == null) {
+                              return const Center(
+                                child: Text('Failed to load news'),
+                              );
+                            }
+                              
+                            final articles = snapshot.data!.articles;
+                            return ListView.builder(
+                              padding: const EdgeInsets.only(bottom: 200),
+                              itemCount: articles.length,
+                              itemBuilder: (context, index) {
+                                final article = articles[index];
+                              
+                                return NewsBlock(
+                                  imagePath: article.urlToImage,
+                                  newsHeadlines: article.source?.name != null
+                                      ? article.source!.name!
+                                      : "Latest news",
+                                  newsHeadlinesTitle: article.title != null
+                                      ? article.title!
+                                      : "",
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => NewsScreen(
+                                          imageUrl: article.urlToImage,
+                                          title: article.title,
+                                          headline: article.source?.name,
+                                          author: article.author,
+                                          description: article.description,
+                                          time: article.publishedAt.toString(),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
             Positioned(
@@ -204,8 +267,6 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
     );
   }
 }
-
-
 
 class NewsBlock extends StatelessWidget {
   final String? imagePath;
@@ -288,8 +349,6 @@ class NewsBlock extends StatelessWidget {
     );
   }
 }
-
-
 
 class NewsTabs extends StatelessWidget {
   final String tabLabel;
