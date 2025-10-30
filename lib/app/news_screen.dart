@@ -2,6 +2,7 @@ import 'package:demo_app/util/widget/util_widget.dart';
 import 'package:flutter/material.dart';
 
 import '../util/function/date_convertion.dart';
+import '../util/widget/bottom_navigation.dart';
 import 'news_feed_screen.dart';
 
 class NewsScreen extends StatelessWidget {
@@ -127,37 +128,7 @@ class NewsScreen extends StatelessWidget {
               bottom: 20,
               left: 20, // equal margin on left
               right: 20,
-              child: Container(
-                height: 68,
-                decoration: BoxDecoration(
-                  color: Color(0xFF3C25B3),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      BottomNavIcon(
-                        imagePath: "assets/icons/home.svg",
-                        isActive: true,
-                      ),
-                      BottomNavIcon(
-                        imagePath: "assets/icons/explore.svg",
-                        isActive: false,
-                      ),
-                      BottomNavIcon(
-                        imagePath: "assets/icons/heart.svg",
-                        isActive: false,
-                      ),
-                      BottomNavIcon(
-                        imagePath: "assets/icons/profile.svg",
-                        isActive: false,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              child: BottomNav(),
             ),
           ],
         ),

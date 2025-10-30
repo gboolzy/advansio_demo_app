@@ -1,4 +1,6 @@
 import 'package:demo_app/app/news_screen.dart';
+import 'package:demo_app/app/service/auth_service.dart';
+import 'package:demo_app/util/widget/bottom_navigation.dart';
 import 'package:demo_app/util/widget/user_input_fields.dart';
 import 'package:demo_app/util/widget/util_widget.dart';
 import 'package:flutter/material.dart';
@@ -15,11 +17,19 @@ class NewsFeedScreen extends StatefulWidget {
 }
 
 class _NewsFeedScreenState extends State<NewsFeedScreen> {
+  String? userName = "";
+  Future<void> loadUser() async {
+    userName = await LocalAuthService.getUserName();
+    setState(() {});
+  }
+
   @override
   void initState() {
     // TODO: implement initState
+    loadUser();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -54,7 +64,7 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
                             ),
                             SizedBox(width: 10),
                             Text(
-                              'Hi, Jay',
+                              userName !=null ?  'Hi, $userName': 'Hi, ' ,
                               style: TextStyle(
                                 fontFamily: 'Satoshi',
                                 fontSize: 24,
@@ -64,63 +74,32 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
                             ),
                           ],
                         ),
-                        AppNotification(isActive: true,),
+                        AppNotification(isActive: true),
                       ],
                     ),
                   ),
                   SizedBox(height: 20),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 250,
-                        child: Text(
-                          'Some News make People happy.',
-                          style: TextStyle(
-                            fontFamily: 'Satoshi',
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF071A27),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              '🔥 Hot news',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontFamily: 'Satoshi',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF071A27),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  NewsBlock(newsHeadlines: "🔥 Hot news", newsHeadlinesTitle: "Fuel subsidy discussion in T-pain reign ", fontSize: 24, onTap: (){}),
+                  
                   SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        width: 264,
-                        child: Text(
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor  Excepteur sint occaecat cupidatat non.',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontFamily: 'Satoshi',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF475569),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.end,
+                  //   children: [
+                  //     SizedBox(
+                  //       width: 264,
+                  //       child: Text(
+                  //         'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor  Excepteur sint occaecat cupidatat non.',
+                  //         textAlign: TextAlign.right,
+                  //         style: TextStyle(
+                  //           fontFamily: 'Satoshi',
+                  //           fontSize: 14,
+                  //           fontWeight: FontWeight.w500,
+                  //           color: Color(0xFF475569),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -162,43 +141,54 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
                   SizedBox(height: 20),
                   Expanded(
                     child: FutureBuilder<NewsFeedResponse?>(
-                        future: fetchNewsFeed(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasError || snapshot.data == null) {
-                            return const Center(
-                                child: Text('Failed to load news'));
-                          }
-
-                          final articles = snapshot.data!.articles;
-                          return ListView.builder(
-                              itemCount: articles.length,
-                              itemBuilder: (context, index) {
-                                final article = articles[index];
-                                return NewsBlock(
-                                  imagePath: article.urlToImage,
-                                  newsHeadlines: article.source?.name != null? article.source!.name!: "Latest news",
-                                  newsHeadlinesTitle: article.title != null? article.title!: "",
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (
-                                            context) =>  NewsScreen(imageUrl: article.urlToImage, title: article.title, headline: article.source?.name, author: article.author, description: article.description, time: article.publishedAt.toString(),),
-                                      ),
-                                    );
-                                  },
-                                );
-                              }
+                      future: fetchNewsFeed(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
                           );
-
                         }
-                          ),
-                  )
+                        if (snapshot.hasError || snapshot.data == null) {
+                          return const Center(
+                            child: Text('Failed to load news'),
+                          );
+                        }
+
+                        final articles = snapshot.data!.articles;
+                        return ListView.builder(
+                          itemCount: articles.length,
+                          itemBuilder: (context, index) {
+                            final article = articles[index];
+                            return NewsBlock(
+                              imagePath: article.urlToImage,
+                              newsHeadlines: article.source?.name != null
+                                  ? article.source!.name!
+                                  : "Latest news",
+                              newsHeadlinesTitle: article.title != null
+                                  ? article.title!
+                                  : "",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => NewsScreen(
+                                      imageUrl: article.urlToImage,
+                                      title: article.title,
+                                      headline: article.source?.name,
+                                      author: article.author,
+                                      description: article.description,
+                                      time: article.publishedAt.toString(),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -206,37 +196,7 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
               bottom: 20,
               left: 20, // equal margin on left
               right: 20,
-              child: Container(
-                height: 68,
-                decoration: BoxDecoration(
-                  color: Color(0xFF3C25B3),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      BottomNavIcon(
-                        imagePath: "assets/icons/home.svg",
-                        isActive: true,
-                      ),
-                      BottomNavIcon(
-                        imagePath: "assets/icons/explore.svg",
-                        isActive: false,
-                      ),
-                      BottomNavIcon(
-                        imagePath: "assets/icons/heart.svg",
-                        isActive: false,
-                      ),
-                      BottomNavIcon(
-                        imagePath: "assets/icons/profile.svg",
-                        isActive: false,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              child: BottomNav(),
             ),
           ],
         ),
@@ -274,7 +234,15 @@ class NewsBlock extends StatelessWidget {
               SizedBox(
                 height: 171,
                 width: double.infinity,
-                child: imagePath != null ? Image.network(imagePath!): Image.asset("assets/images/news_img.png"),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: imagePath != null
+                      ? Image.network(imagePath!, fit: BoxFit.cover)
+                      : Image.asset(
+                          "assets/images/news_img.png",
+                          fit: BoxFit.cover,
+                        ),
+                ),
               ),
               Positioned(
                 right: 20,
@@ -314,42 +282,14 @@ class NewsBlock extends StatelessWidget {
               color: Color(0xFF475569),
             ),
           ),
-          SizedBox(
-            height: 20,
-          )
+          SizedBox(height: 20),
         ],
       ),
     );
   }
 }
 
-class BottomNavIcon extends StatelessWidget {
-  final String imagePath;
-  final bool isActive;
-  const BottomNavIcon({
-    super.key,
-    required this.imagePath,
-    required this.isActive,
-  });
 
-  @override
-  Widget build(BuildContext context) {
-    return isActive
-        ? Container(
-            height: 36,
-            width: 48,
-            decoration: BoxDecoration(
-              color: Color(0xFF071A27),
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: Align(
-              alignment: Alignment.center,
-              child: SvgPicture.asset(imagePath),
-            ),
-          )
-        : SvgPicture.asset(imagePath);
-  }
-}
 
 class NewsTabs extends StatelessWidget {
   final String tabLabel;

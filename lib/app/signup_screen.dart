@@ -1,4 +1,5 @@
 import 'package:demo_app/app/login_screen.dart';
+import 'package:demo_app/app/service/auth_service.dart';
 import 'package:demo_app/app/status_screen.dart';
 import 'package:demo_app/util/widget/app_button.dart';
 import 'package:demo_app/util/widget/app_logo.dart';
@@ -16,6 +17,23 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      // Form is valid
+      LocalAuthService.signup(usernameController.text, emailController.text, passwordController.text);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StatusScreen()),
+      );
+    } else {
+      // Form not valid
+      print('Please fix errors');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,30 +130,65 @@ class _SignupScreenState extends State<SignupScreen> {
                                         InputField(
                                           inputLabel: 'User name',
                                           inputPlaceholder: 'Enter your username',
+                                          textInputType: TextInputType.text,
+                                          controller: usernameController,
+                                          validator: (value){
+                                            if (value == null || value.isEmpty) {
+                                              return 'username is required';
+                                            }
+                                            if (value.length < 6) {
+                                              return 'username must be at least 6 characters';
+                                            }
+                                            return null;
+                                          },
                                         ),
                                         SizedBox(height: 15),
                                         InputField(
                                           inputLabel: 'Email',
                                           inputPlaceholder: 'Enter your email',
+                                          textInputType: TextInputType.emailAddress,
+                                          controller: emailController,
+                                          validator: (value){
+                                            if (value == null || value.isEmpty) {
+                                              return 'Email is required';
+                                            }
+                                            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                                              return 'Enter a valid email';
+                                            }
+                                            return null;
+                                          },
                                         ),
                                         SizedBox(height: 15),
                                         InputField(
                                           inputLabel: 'Password',
                                           inputPlaceholder: 'Enter your password',
+                                          obscureText: true,
+                                          controller: passwordController,
+                                          validator: (value){
+                                            if (value == null || value.isEmpty) {
+                                              return 'Password is required';
+                                            }
+                                            if (value.length < 6) {
+                                              return 'Password must be at least 6 characters';
+                                            }
+                                            return null;
+                                          },
                                         ),
                                         const SizedBox(height: 20),
                                         Row(
                                           children: [
                                             Align(
                                               alignment: Alignment.centerLeft,
-                                              child: AppContainerButton(buttonText: 'Signup', onPress: (){
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(builder: (context) => const StatusScreen()),
-                                                );
+                                              child: AppContainerButton(buttonText: 'Sign Up', onPress: (){
+                                                _submitForm();
+                                                // Navigator.push(
+                                                //   context,
+                                                //   MaterialPageRoute(builder: (context) => const StatusScreen()),
+                                                // );
                                               }, ),
                                             ),
                                             AppTextButton(buttonText: "Login" , alignment: Alignment.centerRight , onPress: (){
+                                              // _submitForm;
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(builder: (context) => const LoginScreen()),

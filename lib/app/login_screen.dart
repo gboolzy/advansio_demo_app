@@ -1,4 +1,5 @@
 import 'package:demo_app/app/news_feed_screen.dart';
+import 'package:demo_app/app/service/auth_service.dart';
 import 'package:demo_app/app/signup_screen.dart';
 import 'package:demo_app/app/status_screen.dart';
 import 'package:demo_app/util/widget/app_button.dart';
@@ -17,6 +18,31 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      // Form is valid
+      bool userStatus = await LocalAuthService.validateUser(usernameController.text, passwordController.text);
+      if(userStatus){
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+            const NewsFeedScreen(),
+          ),
+        );
+      }else{
+        print("false");
+      }
+
+    } else {
+      // Form not valid
+      print('Please fix errors');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 200,
                   child: AppLogo(mainAxisAlignment: MainAxisAlignment.center),
                 ),
-                Expanded(child: Container(),),
+                Expanded(child: Container()),
                 Stack(
                   children: [
                     Padding(
@@ -115,34 +141,82 @@ class _LoginScreenState extends State<LoginScreen> {
                                         InputField(
                                           inputLabel: 'User name',
                                           inputPlaceholder:
-                                              'Enter your username',
+                                              'Enter your user name',
+                                          textInputType: TextInputType.text,
+                                          controller: usernameController,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'username is required';
+                                            }
+                                            if (value.length < 6) {
+                                              return 'username must be at least 6 characters';
+                                            }
+                                            return null;
+                                          },
                                         ),
                                         SizedBox(height: 15),
                                         InputField(
                                           inputLabel: 'Password',
                                           inputPlaceholder:
                                               'Enter your password',
+                                          obscureText: true,
+                                          controller: passwordController,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Password is required';
+                                            }
+                                            if (value.length < 6) {
+                                              return 'Password must be at least 6 characters';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              'Forgot Password?',
+                                              style: TextStyle(
+                                                fontFamily: 'Satoshi',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xFF475569),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         const SizedBox(height: 20),
                                         Row(
                                           children: [
                                             AppTextButton(
-                                              buttonText: "Signup",
+                                              buttonText: "Sign Up",
                                               alignment: Alignment.centerLeft,
-                                              onPress: (){
+                                              onPress: () {
                                                 Navigator.push(
                                                   context,
-                                                  MaterialPageRoute(builder: (context) => const SignupScreen()),
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                    const SignupScreen(),
+                                                  ),
                                                 );
+
                                               },
                                             ),
                                             AppContainerButton(
                                               buttonText: 'Login',
-                                              onPress: (){
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(builder: (context) => const NewsFeedScreen()),
-                                                );
+                                              onPress: () {
+                                                _submitForm();
+                                                // Navigator.push(
+                                                //   context,
+                                                //   MaterialPageRoute(
+                                                //     builder: (context) =>
+                                                //         const NewsFeedScreen(),
+                                                //   ),
+                                                // );
                                               },
                                             ),
                                           ],

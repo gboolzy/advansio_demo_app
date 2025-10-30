@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 
 class InputField extends StatelessWidget {
   final String? inputLabel;
@@ -9,6 +9,8 @@ class InputField extends StatelessWidget {
   final bool? obscureText;
   final Color? backgroundColor;
   final Widget? prefixIcon;
+  final String? Function(String?)? validator;
+  final TextEditingController? controller;
   const InputField({
     super.key,
     this.inputLabel,
@@ -18,6 +20,8 @@ class InputField extends StatelessWidget {
     this.obscureText,
     this.backgroundColor,
     this.prefixIcon,
+    this.validator,
+    this.controller,
   });
 
   @override
@@ -39,6 +43,7 @@ class InputField extends StatelessWidget {
           height: 49,
           child: TextFormField(
             obscureText: obscureText ?? false,
+            controller: controller,
             keyboardType: textInputType ?? TextInputType.text,
             decoration: InputDecoration(
               hint: Text(
@@ -69,16 +74,7 @@ class InputField extends StatelessWidget {
                 borderSide: BorderSide.none,
               ),
             ),
-
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Email is required';
-              }
-              if (!value.contains('@')) {
-                return 'Enter a valid email';
-              }
-              return null;
-            },
+            validator: validator
           ),
         ),
       ],
